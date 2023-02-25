@@ -9,9 +9,6 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping(path = "/users")
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -31,12 +28,12 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto addUser(@Valid @RequestBody User user) {
+    public UserDto addUser(@Valid @RequestBody UserDto user) {
         return userService.addUser(user);
     }
 
     @PatchMapping("/{id}")
-    public UserDto updateUser(@RequestBody User user, @PathVariable Long id) {
+    public UserDto updateUser(@RequestBody UserDto user, @PathVariable Long id) {
         return userService.updateUser(user, id);
     }
 

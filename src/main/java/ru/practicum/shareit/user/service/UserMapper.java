@@ -12,4 +12,13 @@ public class UserMapper {
                 .email(user.getEmail())
                 .build();
     }
+
+    public static User toUser(UserDto user) {
+        return User
+                .builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .build();
+    }
 }

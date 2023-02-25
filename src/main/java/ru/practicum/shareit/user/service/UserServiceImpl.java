@@ -33,24 +33,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addUser(User user) {
-        checkEmailUnique(user);
-        return UserMapper.toDto(userStorage.addUser(user));
+    public UserDto addUser(UserDto user) {
+        User tempUser = UserMapper.toUser(user);
+        checkEmailUnique(tempUser);
+        return UserMapper.toDto(userStorage.addUser(tempUser));
     }
 
     @Override
-    public UserDto updateUser(User user, Long id) {
+    public UserDto updateUser(UserDto user, Long id) {
+        User userFromDto = UserMapper.toUser(user);
         User tempUser = userStorage.getUser(id)
                 .orElseThrow(() -> new NotFoundException(String.format("%s %s %d %s",
                         "Невозможно обновить данные пользователя. ", "Пользователь с id:", id, "не найден")));
         if (user.getEmail() != null) {
             if (!user.getEmail().equals(tempUser.getEmail())) {
-                checkEmailUnique(user);
+                checkEmailUnique(userFromDto);
             }
-            tempUser.setEmail(user.getEmail());
+            tempUser.setEmail(userFromDto.getEmail());
         }
         if (user.getName() != null) {
-            tempUser.setName(user.getName());
+            tempUser.setName(userFromDto.getName());
         }
         return UserMapper.toDto(userStorage.updateUser(tempUser));
     }
