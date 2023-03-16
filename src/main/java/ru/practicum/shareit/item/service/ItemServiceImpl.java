@@ -68,10 +68,12 @@ public class ItemServiceImpl implements ItemService {
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList()));
         if (item.getOwner().getId().equals(ownerId)) {
-            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndStatusEqualsOrderByStartAsc(id,
+            itemDto.setLastBooking(bookingRepository.findAllByItemIdAndStartBeforeAndStatusEqualsOrderByStartDesc(id,
+                    LocalDateTime.now(),
                     BookingStatus.APPROVED).isEmpty() ?
                     null :
-                    BookingMapper.toBookingShortDto(bookingRepository.findAllByItemIdAndStatusEqualsOrderByStartAsc(id,
+                    BookingMapper.toBookingShortDto(bookingRepository.findAllByItemIdAndStartBeforeAndStatusEqualsOrderByStartDesc(id,
+                            LocalDateTime.now(),
                             BookingStatus.APPROVED).get(0)));
             itemDto.setNextBooking(bookingRepository.findAllByItemIdAndStartAfterAndStatusEqualsOrderByStartAsc(itemDto.getId(),
                     LocalDateTime.now(),
