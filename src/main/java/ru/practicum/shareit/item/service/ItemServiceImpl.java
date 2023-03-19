@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
                             LocalDateTime.now()).get(0)));
             itemDto.setComments(commentRepository.findAllByItemId(itemDto.getId())
                     .stream()
-                    .map(CommentMapper::toCommentDto)
+                    .map(ItemDto::toCommentDtoShort)
                     .collect(Collectors.toList()));
         });
         return itemDtoList;
@@ -65,7 +65,7 @@ public class ItemServiceImpl implements ItemService {
         ItemDto itemDto = ItemMapper.toDto(item);
         itemDto.setComments(commentRepository.findAllByItemId(id)
                 .stream()
-                .map(CommentMapper::toCommentDto)
+                .map(ItemDto::toCommentDtoShort)
                 .collect(Collectors.toList()));
         if (item.getOwner().getId().equals(ownerId)) {
             itemDto.setLastBooking(bookingRepository.findAllByItemIdAndStartBeforeAndStatusEqualsOrderByStartDesc(id,
