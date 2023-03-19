@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
-import ru.practicum.shareit.request.model.ItemRequest;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -28,8 +27,6 @@ public class ItemDto {
 
     @NotNull
     Boolean available;
-
-    ItemRequest request;
 
     BookingShortDto lastBooking;
 

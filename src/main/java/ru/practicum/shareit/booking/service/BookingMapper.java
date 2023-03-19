@@ -5,14 +5,15 @@ import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.model.Booking;
 
 public class BookingMapper {
+
     public static BookingDto toBookingDto(Booking booking) {
         return BookingDto.builder()
                 .id(booking.getId())
                 .start(booking.getStart())
                 .end(booking.getEnd())
-                .booker(booking.getBooker())
+                .booker(BookingDto.toUserShortDto(booking.getBooker()))
                 .status(booking.getStatus())
-                .item(booking.getItem())
+                .item(BookingDto.toItemShortDto(booking.getItem()))
                 .build();
     }
 

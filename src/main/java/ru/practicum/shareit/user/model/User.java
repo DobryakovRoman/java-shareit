@@ -4,8 +4,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 
 
 @Getter
@@ -22,12 +20,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     String name;
 
-    @Email
-    @NotBlank
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 50)
     String email;
 }
