@@ -4,11 +4,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exceptions.EmailDublicate;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,56 +18,52 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserServiceImpl implements UserService {
 
-    final UserStorage userStorage;
+    final UserRepository userRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getUsers() {
-        return userStorage.getUsers().stream().map(UserMapper::toDto).collect(Collectors.toList());
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUser(Long id) {
-        User user = userStorage.getUser(id)
-                .orElseThrow(() -> new NotFoundException(String.format("%s %d %s", "Пользователь с id:", id, "не найден")));
+        User user = userRepository.findById(id)
+                .orElseThrow(
+                        () -> new NotFoundException(String.format("%s %d %s", "Пользователь с id:", id, "не найден")));
         return UserMapper.toDto(user);
     }
 
     @Override
+    @Transactional
     public UserDto addUser(UserDto user) {
         User tempUser = UserMapper.toUser(user);
-        checkEmailUnique(tempUser);
-        return UserMapper.toDto(userStorage.addUser(tempUser));
+        return UserMapper.toDto(userRepository.save(tempUser));
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(UserDto user, Long id) {
         User userFromDto = UserMapper.toUser(user);
-        User tempUser = userStorage.getUser(id)
+        User tempUser = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("%s %s %d %s",
                         "Невозможно обновить данные пользователя. ", "Пользователь с id:", id, "не найден")));
         if (user.getEmail() != null) {
-            if (!user.getEmail().equals(tempUser.getEmail())) {
-                checkEmailUnique(userFromDto);
-            }
             tempUser.setEmail(userFromDto.getEmail());
         }
         if (user.getName() != null) {
             tempUser.setName(userFromDto.getName());
         }
-        return UserMapper.toDto(userStorage.updateUser(tempUser));
+        return UserMapper.toDto(userRepository.save(tempUser));
     }
 
     @Override
+    @Transactional
     public void removeUser(Long id) {
-        getUser(id);
-        userStorage.removeUser(id);
-    }
-
-    void checkEmailUnique(User user) {
-        for (User userCheck : userStorage.getUsers()) {
-            if (user.getEmail().equals(userCheck.getEmail())) {
-                throw new EmailDublicate("Пользователь с таким email уже зарегистрирован");
-            }
-        }
+        userRepository.deleteById(id);
     }
 }

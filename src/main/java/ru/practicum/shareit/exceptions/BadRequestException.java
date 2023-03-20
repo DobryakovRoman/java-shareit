@@ -1,12 +1,12 @@
 package ru.practicum.shareit.exceptions;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.CONFLICT)
-public class EmailDublicate extends RuntimeException {
-    public EmailDublicate(String s) {
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class BadRequestException extends RuntimeException {
+
+    public BadRequestException(String s) {
         super(s);
     }
 }
