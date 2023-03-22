@@ -16,6 +16,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -33,6 +35,7 @@ public class ItemServiceImpl implements ItemService {
     final UserRepository userRepository;
     final BookingRepository bookingRepository;
     final CommentRepository commentRepository;
+    final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -96,6 +99,12 @@ public class ItemServiceImpl implements ItemService {
                         "Невозможно добавить вещь. ", "Пользователь с id:", userId, "не найден")));
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(user);
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException(
+                            String.format("%s %s %d %s", "Невозможно создать вещь - не найден запрос с id: " + itemDto.getRequestId())));
+            item.setRequest(itemRequest);
+        }
         itemRepository.save(item);
         return ItemMapper.toDto(item);
     }

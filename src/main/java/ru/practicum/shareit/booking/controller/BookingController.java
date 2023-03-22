@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exceptions.BadRequestException;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -20,7 +21,7 @@ public class BookingController {
     final BookingService bookingService;
 
     @PostMapping
-    public BookingDto create(@Valid @RequestBody BookingShortDto bookingShortDto,
+    public BookingDto addBooking(@Valid @RequestBody BookingShortDto bookingShortDto,
                              @RequestHeader("X-Sharer-User-Id") Long userId) {
         return bookingService.addBooking(bookingShortDto, userId);
     }
@@ -33,14 +34,24 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingDto> getAllByOwner(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                          @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByOwner(userId, state);
+                                          @RequestParam(defaultValue = "ALL") String state,
+                                          @RequestParam(defaultValue = "0") Long from,
+                                          @RequestParam(defaultValue = "10") Long size) {
+        if (from < 0 || size <= 0) {
+            throw new BadRequestException("Указаны неправильные параметры запроса");
+        }
+        return bookingService.getAllByOwner(userId, state, from, size);
     }
 
     @GetMapping
     public List<BookingDto> getAllByUser(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                         @RequestParam(defaultValue = "ALL") String state) {
-        return bookingService.getAllByUser(userId, state);
+                                         @RequestParam(defaultValue = "ALL") String state,
+                                         @RequestParam(defaultValue = "0") Long from,
+                                         @RequestParam(defaultValue = "10") Long size) {
+        if (from < 0 || size <= 0) {
+            throw new BadRequestException("Указаны неправильные параметры запроса");
+        }
+        return bookingService.getAllByUser(userId, state, from, size);
     }
 
     @GetMapping("/{bookingId}")
