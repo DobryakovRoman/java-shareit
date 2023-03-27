@@ -24,24 +24,17 @@ public class BookingRepositoryTest {
 
     @Autowired
     BookingRepository bookingRepository;
-
     @Autowired
     UserRepository userRepository;
-
     @Autowired
     ItemRepository itemRepository;
 
-    User firstUser;
-    User secondUser;
-    Item item;
-    Booking booking;
-
     @BeforeEach
     void beforeEach() {
-        firstUser = User.builder().id(1L).name("firstUser").email("firstUser@ya.ru").build();
-        secondUser = User.builder().id(2L).name("secondUser").email("secondUser@ya.ru").build();
-        item = Item.builder().id(1L).name("firstName").description("Description").available(true).owner(firstUser).build();
-        booking = Booking.builder()
+        User firstUser = User.builder().id(1L).name("firstUser").email("firstUser@ya.ru").build();
+        User secondUser = User.builder().id(2L).name("secondUser").email("secondUser@ya.ru").build();
+        Item item = Item.builder().id(1L).name("firstName").description("Description").available(true).owner(firstUser).request(null).build();
+        Booking booking = Booking.builder()
                 .id(1L)
                 .item(item)
                 .start(LocalDateTime.now().plusDays(3))
@@ -58,6 +51,8 @@ public class BookingRepositoryTest {
     @AfterEach
     void afterEach() {
         bookingRepository.deleteAll();
+        userRepository.deleteAll();
+        itemRepository.deleteAll();
     }
 
     @Test
