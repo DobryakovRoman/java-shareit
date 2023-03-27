@@ -31,20 +31,17 @@ public class BookingRepositoryTest {
 
     @BeforeEach
     void beforeEach() {
-        User firstUser = User.builder().id(1L).name("firstUser").email("firstUser@ya.ru").build();
-        User secondUser = User.builder().id(2L).name("secondUser").email("secondUser@ya.ru").build();
-        Item item = Item.builder().id(1L).name("firstName").description("Description").available(true).owner(firstUser).request(null).build();
+        userRepository.save(User.builder().name("firstUser").email("firstUser@ya.ru").build());
+        userRepository.save(User.builder().name("secondUser").email("secondUser@ya.ru").build());
+        itemRepository.save(Item.builder().name("firstName").description("Description").available(true).owner(userRepository.findAll().get(0)).request(null).build());
         Booking booking = Booking.builder()
                 .id(1L)
-                .item(item)
+                .item(itemRepository.findAll().get(0))
                 .start(LocalDateTime.now().plusDays(3))
                 .end(LocalDateTime.now().plusDays(4))
-                .booker(secondUser)
+                .booker(userRepository.findAll().get(1))
                 .status(BookingStatus.WAITING)
                 .build();
-        userRepository.save(firstUser);
-        userRepository.save(secondUser);
-        itemRepository.save(item);
         bookingRepository.save(booking);
     }
 
