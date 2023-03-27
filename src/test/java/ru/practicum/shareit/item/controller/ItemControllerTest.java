@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,7 +46,6 @@ class ItemControllerTest {
     ItemDto itemDto;
     Item item;
     Comment comment;
-    CommentDto commentDto;
     User firstUser;
 
     @BeforeEach
@@ -61,7 +59,7 @@ class ItemControllerTest {
     @Test
     @SneakyThrows
     void getItemsTest() {
-        when(itemService.getItems(anyLong()))
+        when(itemService.getItems(anyInt(), anyInt(), anyLong()))
                 .thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items")
@@ -138,7 +136,7 @@ class ItemControllerTest {
     @Test
     @SneakyThrows
     void search() {
-        when(itemService.search(anyString()))
+        when(itemService.search(anyInt(), anyInt(), anyString()))
                 .thenReturn(List.of(itemDto));
 
         mvc.perform(get("/items/search?text='Description'")

@@ -9,6 +9,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingStatus;
@@ -18,7 +20,6 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -37,8 +38,6 @@ import static org.mockito.Mockito.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 class ItemServiceImplTest {
 
-    @Mock
-    ItemRequestRepository itemRequestRepository;
     @Mock
     UserRepository userRepository;
     @Mock
@@ -74,12 +73,12 @@ class ItemServiceImplTest {
 
     @Test
     void getItemsTest() {
-        when(itemRepository.findAllByOwnerId(anyLong())).thenReturn(List.of(item));
+        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(new PageImpl<>(List.of(item)));
         itemDto.setComments(new ArrayList<>());
 
-        List<ItemDto> result = itemServiceImpl.getItems(firstUser.getId());
+        List<ItemDto> result = itemServiceImpl.getItems(0, 10, firstUser.getId());
 
-        verify(itemRepository, times(1)).findAllByOwnerId(anyLong());
+        verify(itemRepository, times(1)).findAllByOwnerId(firstUser.getId(), Pageable.ofSize(10));
         assertEquals(itemDto.getId(), result.get(0).getId());
     }
 
@@ -131,7 +130,7 @@ class ItemServiceImplTest {
     void searchTest() {
         when(itemRepository.findAll()).thenReturn(List.of(item));
 
-        List<ItemDto> result = itemServiceImpl.search("Description");
+        List<ItemDto> result = itemServiceImpl.search(0, 10, "Description");
 
         verify(itemRepository).findAll();
         assertEquals(item.getDescription(), result.get(0).getDescription());

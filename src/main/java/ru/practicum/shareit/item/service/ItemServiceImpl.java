@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -39,8 +40,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItems(Long userId) {
-        List<ItemDto> itemDtoList = itemRepository.findAllByOwnerId(userId)
+    public List<ItemDto> getItems(int from, int size, Long userId) {
+        List<ItemDto> itemDtoList = itemRepository.findAllByOwnerId(userId, PageRequest.of(from, size))
                 .stream()
                 .map(ItemMapper::toDto)
                 .collect(Collectors.toList());
@@ -102,7 +103,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getRequestId() != null) {
             ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
                     .orElseThrow(() -> new NotFoundException(
-                            String.format("%s %s %d %s", "Невозможно создать вещь - не найден запрос с id: " + itemDto.getRequestId())));
+                            String.format("%s %d", "Невозможно создать вещь - не найден запрос с id: ", itemDto.getRequestId())));
             item.setRequest(itemRequest);
         }
         itemRepository.save(item);
@@ -137,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(int from, int size, String text) {
         List<ItemDto> resultItems = new ArrayList<>();
         if (text.isBlank()) {
             return resultItems;
@@ -149,7 +150,11 @@ public class ItemServiceImpl implements ItemService {
                 resultItems.add(ItemMapper.toDto(item));
             }
         }
-        return resultItems;
+        return resultItems
+                .stream()
+                .filter(itemDto -> itemDto.getId() >= from)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     @Override
