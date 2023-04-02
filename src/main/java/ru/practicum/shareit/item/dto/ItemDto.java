@@ -37,6 +37,8 @@ public class ItemDto {
 
     List<CommentDtoShort> comments;
 
+    Long requestId;
+
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE)
     @Builder

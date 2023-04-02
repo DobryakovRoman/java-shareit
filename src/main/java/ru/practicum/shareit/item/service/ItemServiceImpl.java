@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -16,6 +17,8 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -33,11 +36,12 @@ public class ItemServiceImpl implements ItemService {
     final UserRepository userRepository;
     final BookingRepository bookingRepository;
     final CommentRepository commentRepository;
+    final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItems(Long userId) {
-        List<ItemDto> itemDtoList = itemRepository.findAllByOwnerId(userId)
+    public List<ItemDto> getItems(int from, int size, Long userId) {
+        List<ItemDto> itemDtoList = itemRepository.findAllByOwnerId(userId, PageRequest.of(from, size))
                 .stream()
                 .map(ItemMapper::toDto)
                 .collect(Collectors.toList());
@@ -96,6 +100,12 @@ public class ItemServiceImpl implements ItemService {
                         "Невозможно добавить вещь. ", "Пользователь с id:", userId, "не найден")));
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(user);
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException(
+                            String.format("%s %d", "Невозможно создать вещь - не найден запрос с id: ", itemDto.getRequestId())));
+            item.setRequest(itemRequest);
+        }
         itemRepository.save(item);
         return ItemMapper.toDto(item);
     }
@@ -128,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public List<ItemDto> search(String text) {
+    public List<ItemDto> search(int from, int size, String text) {
         List<ItemDto> resultItems = new ArrayList<>();
         if (text.isBlank()) {
             return resultItems;
@@ -140,7 +150,11 @@ public class ItemServiceImpl implements ItemService {
                 resultItems.add(ItemMapper.toDto(item));
             }
         }
-        return resultItems;
+        return resultItems
+                .stream()
+                .filter(itemDto -> itemDto.getId() >= from)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     @Override

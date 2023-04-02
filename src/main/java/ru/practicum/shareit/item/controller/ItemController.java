@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exceptions.BadRequestException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -20,8 +21,13 @@ public class ItemController {
     final ItemService itemService;
 
     @GetMapping
-    public List<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.getItems(userId);
+    public List<ItemDto> getItems(@RequestParam(defaultValue = "0") int from,
+                                  @RequestParam(defaultValue = "10") int size,
+                                  @RequestHeader("X-Sharer-User-Id") Long userId) {
+        if (from < 0 || size <= 0) {
+            throw new BadRequestException("Указаны неправильные параметры запроса");
+        }
+        return itemService.getItems(from, size, userId);
     }
 
     @GetMapping("/{id}")
@@ -46,8 +52,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam String text) {
-        return itemService.search(text);
+    public List<ItemDto> search(@RequestParam(defaultValue = "0") int from,
+                                @RequestParam(defaultValue = "10") int size,
+                                @RequestParam String text) {
+        return itemService.search(from, size, text);
     }
 
     @PostMapping("/{itemId}/comment")
