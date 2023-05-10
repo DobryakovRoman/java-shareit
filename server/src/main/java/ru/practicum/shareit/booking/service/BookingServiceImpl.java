@@ -51,22 +51,6 @@ public class BookingServiceImpl implements BookingService {
                     "Невозможно создать бронирование - вещь недоступна");
         }
         Booking booking = BookingMapper.toBooking(bookingShortDto);
-        if (booking.getEnd() == null) {
-            throw new BadRequestException(
-                    "Невозможно создать бронирование - дата окончания бронирования должна быть указана");
-        }
-        if (booking.getStart() == null) {
-            throw new BadRequestException(
-                    "Невозможно создать бронирование - дата начала бронирования должна быть указана");
-        }
-        if (booking.getEnd().isEqual(booking.getStart())) {
-            throw new BadRequestException(
-                    "Невозможно создать бронирование - дата окончания бронирования не может быть равна дате начала бронирования");
-        }
-        if (booking.getEnd().isBefore(booking.getStart())) {
-            throw new BadRequestException(
-                    "Невозможно создать бронирование - дата окончания бронирования не может быть раньше даты начала бронирования");
-        }
         booking.setBooker(user);
         booking.setItem(item);
         booking.setStatus(BookingStatus.WAITING);

@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
+import ru.practicum.shareit.exceptions.BadRequestException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -55,6 +56,14 @@ public class BookingController {
     public ResponseEntity<Object> addBooking(@RequestHeader("X-Sharer-User-Id") long userId,
                                              @RequestBody @Valid BookItemRequestDto requestDto) {
         log.info("Creating booking {}, userId={}", requestDto, userId);
+        if (requestDto.getEnd().isEqual(requestDto.getStart())) {
+            throw new BadRequestException(
+                    "Невозможно создать бронирование - дата окончания бронирования не может быть равна дате начала бронирования");
+        }
+        if (requestDto.getEnd().isBefore(requestDto.getStart())) {
+            throw new BadRequestException(
+                    "Невозможно создать бронирование - дата окончания бронирования не может быть раньше даты начала бронирования");
+        }
         return bookingClient.addBooking(userId, requestDto);
     }
 
